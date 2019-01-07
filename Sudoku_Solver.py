@@ -64,8 +64,6 @@ def eliminate(grid_b):
         else:
             continue
     return grid_b
-#grid_boxes = eliminate(grid_boxes)
-#display_grid(grid_boxes)
 # This method is mentioned in udacity
 #def only_choice(grid_b):
 #   for digit in '123456789':
@@ -84,28 +82,26 @@ def only_choice(grid_b):
                     if len(possible_boxes) == 0:
                         grid_b[box] = digit
     return grid_b    
-#grid_boxes = only_choice(grid_boxes)      
-#display_grid(grid_boxes)
+
+def reduce_puzzle(grid_b):
+    stalled = False
+    while not stalled:
+        solved_values_before = [box for box in grid_b if len(grid_b[box]) == 1]
+        #eliminate
+        grid_b = eliminate(grid_b)
+        #only_choice
+        grid_b = only_choice(grid_b)
+        solved_values_after = [box for box in grid_b.keys() if len(grid_b[box]) == 1]
+        stalled = solved_values_before == solved_values_after
+        return grid_b
+
 def solvedgrid(grid_b):
-    unittest = False
-    boxtest = True
+    unittest = True
     for unit in units:
         unitstring = ''.join(sorted(grid_b[box] for box in unit))
-        if unitstring == '123456789':
-            print(True)
-            unittest = True
-    for box in boxes:
-        for peerbox in peers[box]:
-            if grid_b[peerbox] == grid_b[box]:
-                boxtest = False
-                print(False)
-
-    if unittest and boxtest:
-        return True
-
-
-        
-
+        if unitstring != '123456789':
+            unittest = False
+    return unittest
 
 
 def search(grid_b):
@@ -119,22 +115,9 @@ def search(grid_b):
         gridcopy = grid_b.copy()
         gridcopy[box] = digit
         gridcopy = search(gridcopy)
-        if solvedgrid(gridcopy):
+        if gridcopy:
             return gridcopy
-    
-def reduce_puzzle(grid_b):
-    stalled = False
-    while not stalled:
-        solved_values_before = [box for box in grid_b if len(grid_b[box]) == 1]
-        #eliminate
-        grid_b = eliminate(grid_b)
-        #only_choice
-        grid_b = only_choice(grid_b)
-        solved_values_after = [box for box in grid_b.keys() if len(grid_b[box]) == 1]
-        stalled = solved_values_before == solved_values_after
-        return grid_b
-grid_boxes = reduce_puzzle(grid_boxes)
-display_grid(grid_boxes)
+
 grid_boxes= search(grid_boxes)
 print('solved')
 display_grid(grid_boxes)
