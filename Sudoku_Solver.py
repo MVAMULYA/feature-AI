@@ -37,7 +37,8 @@ def grid_values(sudokustr):
         grid_dict[boxes[i]] = sudokustr[i]
     return grid_dict
 sudostr = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
-sudoku2 = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+sudoku2 = '.13....48.....46.....87.......38...734.....829...25.......97.....46.....72....83.'
+#'4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
 grid_boxes = grid_values(sudoku2)
 def display_grid(grid_b):
     width = 1 + max(len(grid_b[a]) for a in grid_b)
@@ -106,8 +107,14 @@ def solvedgrid(grid_b):
 
 def search(grid_b):
     grid_b = reduce_puzzle(grid_b)
+    if grid_b is False:
+        return False
     if all([len(grid_b[box]) == 1 for box in boxes]):
-        return grid_b
+        solved = solvedgrid(grid_b)
+        if solved:
+            return grid_b
+        else:
+            return False
     tobefilled = {grid_b[box]:box for box in boxes if len(grid_b[box]) != 1}
     min_item = min(tobefilled,key=len)
     box = tobefilled[min_item]
@@ -117,11 +124,12 @@ def search(grid_b):
         gridcopy = search(gridcopy)
         if gridcopy:
             return gridcopy
+            
 
 grid_boxes= search(grid_boxes)
-print('solved')
+print(solvedgrid(grid_boxes))
 display_grid(grid_boxes)
-solvedgrid(grid_boxes)
+
 
 
 

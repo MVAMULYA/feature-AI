@@ -85,11 +85,40 @@ def reduce_puzzle(grid_b):
         solved_values_after = [box for box in grid_b.keys() if len(grid_b[box]) == 1]
         stalled = solved_values_before == solved_values_after
     return grid_b
-sudostr = input("enter a sudoku string with 89 characters")
+# Test for correctness
+def solvedgrid(grid_b):
+    unittest = True
+    for unit in units:
+        unitstring = ''.join(sorted(grid_b[box] for box in unit))
+        if unitstring != '123456789':
+            unittest = False
+    return unittest
+
+def solvesudoku(grid_b):
+    grid_b = reduce_puzzle(grid_b)
+    if grid_b is False:
+        return False
+    if all([len(grid_b[box]) == 1 for box in boxes]):
+        solved = solvedgrid(grid_b)
+        if solved:
+            return grid_b
+        else:
+            return False
+    tobefilled = {grid_b[box]:box for box in boxes if len(grid_b[box]) != 1}
+    min_item = min(tobefilled,key=len)
+    box = tobefilled[min_item]
+    for digit in grid_b[box]:
+        gridcopy = grid_b.copy()
+        gridcopy[box] = digit
+        gridcopy = solvesudoku(gridcopy)
+        if gridcopy:
+            return gridcopy
+            
+sudostr = input("enter a sudoku string with 89 characters \n")
 grid_boxes = grid_values(sudostr)
 display_grid(grid_boxes)
 grid_boxes = upgrade_grid(grid_boxes)
 display_grid(grid_boxes)
-grid_boxes = reduce_puzzle(grid_boxes)
+grid_boxes = solvesudoku(grid_boxes)
 print('solved')
 display_grid(grid_boxes)
