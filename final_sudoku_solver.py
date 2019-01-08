@@ -1,25 +1,32 @@
-rows= '123456789'
-columns = 'ABCDEFGHI'
+columns= '123456789'
+rows = 'ABCDEFGHI'
 def cross(row,col):
     listlen = []
-    for c in col:
-        for r in row:
-            listlen.append(c+r)            
+    for r in row:
+        for c in col:
+            listlen.append(r+c)            
     return listlen
 boxes = cross(rows,columns)
-column_units = []
-for r in rows:
-    column_units.append(cross(r,columns))
 row_units = []
 for c in columns:
-    row_units.append(cross(rows,c))    
+    row_units.append(cross(rows,c))
+column_units = []
+for r in rows:
+    column_units.append(cross(r,columns))    
 square_units = []
-rs = ['123','456','789']
-cs = ['ABC','DEF','GHI']
+cs = ['123','456','789']
+rs = ['ABC','DEF','GHI']
 for c in cs:
     for r in rs:
         square_units.append(cross(r,c))
-units = row_units + column_units + square_units
+diagonal1 = [rows[k]+columns[abs(len(rows))-(k+1)] for k in range(0,len(rows))]
+diagonal2 = [rows[k]+columns[k] for k in range(0,len(rows))]
+diagonal_units = [diagonal1,diagonal2]
+
+
+
+units = row_units + column_units + square_units + diagonal_units
+
 peers = {}
 peer_units = {}
 for b in boxes:
@@ -39,11 +46,12 @@ def grid_values(sudokustr):
     return grid_dict
 # Display SUDOKU grid
 def display_grid(grid_b):
+    
     width = 1 + max(len(grid_b[a]) for a in grid_b)
     line = '+'.join(['-'*(width*3)]*3)
-    for c in columns:
-        print(''.join(grid_b[c+r].center(width) + ('|' if r in '36' else '') for r in rows))
-        if c in 'CF':
+    for r in rows:
+        print(''.join(grid_b[r+c].center(width) + ('|' if c in '36' else '') for c in columns))
+        if r in 'CF':
             print(line)
 # Assign values for the blank box
 def upgrade_grid(grid_b):
@@ -82,6 +90,8 @@ def reduce_puzzle(grid_b):
         grid_b = eliminate(grid_b)
         #only_choice
         grid_b = only_choice(grid_b)
+        #naked_twin
+        grid_b = naked_twins(grid_b)
         solved_values_after = [box for box in grid_b.keys() if len(grid_b[box]) == 1]
         stalled = solved_values_before == solved_values_after
     return grid_b
@@ -99,6 +109,7 @@ def solvesudoku(grid_b):
     if grid_b is False:
         return False
     if all([len(grid_b[box]) == 1 for box in boxes]):
+        display_grid(grid_b)
         solved = solvedgrid(grid_b)
         if solved:
             return grid_b
@@ -113,12 +124,22 @@ def solvesudoku(grid_b):
         gridcopy = solvesudoku(gridcopy)
         if gridcopy:
             return gridcopy
+
+def naked_twins(grid_b):
+    for box_a in boxes:
+        for box_b in peers[box_a]:
+            if grid_b[box_a] == grid_b[box_b] and len(grid_b[box_a]) == 2:
+                commonpeers = set(peers[box_a]).intersection(set(peers[box_b]))
+                for item in commonpeers:
+                    for digit in grid_b[box_a]:
+                        grid_b[item] = grid_b[item].replace(digit,'')
+    return grid_b
+
             
 sudostr = input("enter a sudoku string with 89 characters \n")
 grid_boxes = grid_values(sudostr)
 display_grid(grid_boxes)
 grid_boxes = upgrade_grid(grid_boxes)
-display_grid(grid_boxes)
 grid_boxes = solvesudoku(grid_boxes)
 print('solved')
 display_grid(grid_boxes)
