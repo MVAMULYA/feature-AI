@@ -1,3 +1,10 @@
+sudostr = input("enter a sudoku string with 89 characters \n")
+is_diagonal_sudoku = input('enter "y" for diagonal sudoku or "n" for not diagonal sudoku ')
+if is_diagonal_sudoku.lower() == 'y':
+    is_diagonal_sudoku = True
+else:
+    is_diagonal_sudoku = False
+
 columns= '123456789'
 rows = 'ABCDEFGHI'
 def cross(row,col):
@@ -22,11 +29,10 @@ for c in cs:
 diagonal1 = [rows[k]+columns[abs(len(rows))-(k+1)] for k in range(0,len(rows))]
 diagonal2 = [rows[k]+columns[k] for k in range(0,len(rows))]
 diagonal_units = [diagonal1,diagonal2]
-
-
-
-units = row_units + column_units + square_units + diagonal_units
-
+if is_diagonal_sudoku:
+    units = row_units + column_units + square_units + diagonal_units
+else:
+    units = row_units + column_units + square_units
 peers = {}
 peer_units = {}
 for b in boxes:
@@ -81,7 +87,17 @@ def only_choice(grid_b):
                     if len(possible_boxes) == 0:
                         grid_b[box] = digit
     return grid_b 
-# Perform the eliminate, only_choice functions to reduce the possibilities
+# Solve for naked-twins
+def naked_twins(grid_b):
+    for box_a in boxes:
+        for box_b in peers[box_a]:
+            if grid_b[box_a] == grid_b[box_b] and len(grid_b[box_a]) == 2:
+                commonpeers = set(peers[box_a]).intersection(set(peers[box_b]))
+                for item in commonpeers:
+                    for digit in grid_b[box_a]:
+                        grid_b[item] = grid_b[item].replace(digit,'')
+    return grid_b
+# Perform the eliminate, only_choice, naked_twins functions to reduce the possibilities
 def reduce_puzzle(grid_b):
     stalled = False
     while not stalled:
@@ -109,7 +125,6 @@ def solvesudoku(grid_b):
     if grid_b is False:
         return False
     if all([len(grid_b[box]) == 1 for box in boxes]):
-        display_grid(grid_b)
         solved = solvedgrid(grid_b)
         if solved:
             return grid_b
@@ -124,22 +139,13 @@ def solvesudoku(grid_b):
         gridcopy = solvesudoku(gridcopy)
         if gridcopy:
             return gridcopy
-
-def naked_twins(grid_b):
-    for box_a in boxes:
-        for box_b in peers[box_a]:
-            if grid_b[box_a] == grid_b[box_b] and len(grid_b[box_a]) == 2:
-                commonpeers = set(peers[box_a]).intersection(set(peers[box_b]))
-                for item in commonpeers:
-                    for digit in grid_b[box_a]:
-                        grid_b[item] = grid_b[item].replace(digit,'')
-    return grid_b
-
             
-sudostr = input("enter a sudoku string with 89 characters \n")
 grid_boxes = grid_values(sudostr)
 display_grid(grid_boxes)
 grid_boxes = upgrade_grid(grid_boxes)
 grid_boxes = solvesudoku(grid_boxes)
 print('solved')
-display_grid(grid_boxes)
+display_grid(grid_boxes)           
+
+            
+
